@@ -57,14 +57,14 @@ func (c *cache) Del(v interface{}) {
 }
 
 func (c *cache) Reclaim() (res []interface{}) {
-	for c.cnt > c.max && c.inactive.Len() > 0 {
+	for c.isNeedReclaim() && c.inactive.Len() > 0 {
 		v := c.inactive.Remove(c.inactive.Back())
 		res = append(res, v)
 		delete(c.index, v)
 		c.cnt--
 	}
 
-	for c.cnt > c.max && c.active.Len() > 0 {
+	for c.isNeedReclaim() && c.active.Len() > 0 {
 		v := c.active.Remove(c.active.Back())
 		res = append(res, v)
 		delete(c.index, v)
@@ -72,4 +72,8 @@ func (c *cache) Reclaim() (res []interface{}) {
 	}
 
 	return
+}
+
+func (c *cache) isNeedReclaim() true {
+	return c.cnt > c.max
 }
