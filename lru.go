@@ -39,19 +39,36 @@ func (c *cache) Add(v interface{}) {
 		return
 	}
 
-	c.cnt++
 	c.index[v] = &item{false, c.inactive.PushFront(v)}
+	c.cnt++
+}
+
+func (c *cache) Del(v interface{}) {
+	if ci, ok := c.index[v]; ok {
+		if ci.active {
+			c.active.Remove(ci.element)
+		} else {
+			c.inactive.Remove(ci.element)
+		}
+
+		delete(c.index, v)
+		c.cnt--
+	}
 }
 
 func (c *cache) Reclaim() (res []interface{}) {
 	for c.cnt > c.max && c.inactive.Len() > 0 {
+		v := c.inactive.Remove(c.inactive.Back())
+		res = append(res, v)
+		delete(c.index, v)
 		c.cnt--
-		res = append(res, c.inactive.Remove(c.inactive.Back()))
 	}
 
 	for c.cnt > c.max && c.active.Len() > 0 {
+		v := c.active.Remove(c.active.Back())
+		res = append(res, v)
+		delete(c.index, v)
 		c.cnt--
-		res = append(res, c.active.Remove(c.active.Back()))
 	}
 
 	return
