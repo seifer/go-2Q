@@ -1,5 +1,7 @@
 package lru
 
+// Minimalistic version of 2Q lru algorithm
+
 import (
 	"container/list"
 )
