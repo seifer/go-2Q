@@ -1,6 +1,6 @@
 2Q LRU Algorithm
 
-Examples #1 (by count)
+Example #1 (by count)
 
     cache := lru.NewByCount(2)
 
@@ -17,7 +17,7 @@ Examples #1 (by count)
         }
     }
 
-Examples #2 (by size)
+Example #2 (by size)
 
     cache := lru.NewBySize(2)
 
