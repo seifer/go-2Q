@@ -28,7 +28,7 @@ func _new(max int64) cache {
 	}
 }
 
-func (c *cache) add(v interface{}) (*item, bool) {
+func (c *cache) add(v interface{}, iv int64) (*item, bool) {
 	if i, ok := c.index[v]; ok {
 		if i.active {
 			c.active.MoveToFront(i.element)
@@ -39,15 +39,21 @@ func (c *cache) add(v interface{}) (*item, bool) {
 			i.element = c.active.PushFront(v)
 		}
 
+		i.value = iv
+
 		return i, false
 	}
 
-	c.index[v] = &item{0, false, c.inactive.PushFront(v)}
+	c.index[v] = &item{
+		iv,
+		false,
+		c.inactive.PushFront(v),
+	}
 
 	return c.index[v], true
 }
 
-func (c *cache) del(v interface{}) *item {
+func (c *cache) Del(v interface{}) {
 	if i, ok := c.index[v]; ok {
 		if i.active {
 			c.active.Remove(i.element)
@@ -56,31 +62,32 @@ func (c *cache) del(v interface{}) *item {
 		}
 
 		delete(c.index, v)
+		c.threshold -= i.value
 
-		return i
+		return
 	}
 
-	return nil
+	return
 }
 
-func (c *cache) reclaim() (i *item) {
+func (c *cache) Reclaim() (res []interface{}) {
 	if c.threshold <= c.max {
 		return
 	}
 
-	if c.inactive.Len() > 0 {
+	for c.threshold > c.max && c.inactive.Len() > 0 {
 		v := c.inactive.Remove(c.inactive.Back())
-		i = c.index[v]
+		c.threshold -= c.index[v].value
+		res = append(res, v)
 		delete(c.index, v)
-		return
 	}
 
-	if c.active.Len() > 0 {
+	for c.threshold > c.max && c.active.Len() > 0 {
 		v := c.active.Remove(c.active.Back())
-		i = c.index[v]
+		c.threshold -= c.index[v].value
+		res = append(res, v)
 		delete(c.index, v)
-		return
 	}
 
-	return nil
+	return
 }

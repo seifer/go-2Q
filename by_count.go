@@ -9,22 +9,7 @@ func NewByCount(max int64) *cacheByCount {
 }
 
 func (c *cacheByCount) Add(v interface{}) {
-	if i, ok := c.add(v); ok {
+	if _, ok := c.add(v, 1); ok {
 		c.threshold++
 	}
-}
-
-func (c *cacheByCount) Del(v interface{}) {
-	if i := c.del(v); i != nil {
-		c.threshold--
-	}
-}
-
-func (c *cacheByCount) Reclaim() (res []interface{}) {
-	for i := c.reclaim(); i != nil; i = c.reclaim() {
-		res = append(res, i.element.Value)
-		c.threshold--
-	}
-
-	return
 }
