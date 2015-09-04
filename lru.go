@@ -72,6 +72,14 @@ func (c *cache) Del(v interface{}) {
 	return
 }
 
+func (c *cache) Lookup(v interface{}) (bool, bool) {
+	if i, ok := c.index[v]; ok {
+		return true, i.active
+	}
+
+	return false, false
+}
+
 func (c *cache) Reclaim() (res []interface{}) {
 	if c.threshold <= c.max {
 		return
